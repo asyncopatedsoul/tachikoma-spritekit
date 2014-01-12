@@ -285,6 +285,7 @@ static int levelCount = 0;
     windUpVC = [[HUDWindUpViewController alloc] init];
     [windUpVC linkToy:toyNode andKey:masterKey];
     [self.view addSubview:windUpVC.view];
+    [windUpVC setWindUpRadians:toyNode.rotations*(M_PI*2)];
 }
 -(void) hideWindUpInterface
 {

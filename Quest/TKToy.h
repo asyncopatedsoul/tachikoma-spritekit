@@ -17,8 +17,10 @@
 @property (nonatomic, assign) CGPoint actionPoint;
 @property (nonatomic,assign) float rotations;
 @property (nonatomic,assign) float actionRangeMultiplier;
-@property (nonatomic,assign) float defaultActionRange;
 @property (nonatomic,assign) float movementSpeed;
+@property (nonatomic,assign) float actionMagnitude;
+@property (nonatomic,assign) float maxActionMagnitude;
+
 
 @property (nonatomic,assign) int maxWindUpRotations;
 
@@ -30,5 +32,7 @@
 -(void) detachFromKey:(TKMasterKey*)masterKey;
 - (void) startUnwind;
 - (void) stopUnwind;
+
+- (void) setActionVectorToPoint:(CGPoint)actionPoint;
 
 @end

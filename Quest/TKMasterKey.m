@@ -89,7 +89,7 @@
     }];
     
     SKAction *moveLaserActionWithDone = [SKAction sequence:@[detachAction,detachDoneAction]];
-    [self runAction:moveLaserActionWithDone withKey:@"isAttacking"];
+    [self runAction:moveLaserActionWithDone withKey:@"isDetaching"];
     
     
     
@@ -179,7 +179,7 @@
 
 - (void) moveFromMotionManager: (CMAccelerometerData*) data
 {
-    NSLog(@"acceleration value x,y:\n %f, %f",data.acceleration.x,data.acceleration.y);
+    //NSLog(@"acceleration value x,y:\n %f, %f",data.acceleration.x,data.acceleration.y);
     
     // NSLog(@"velocity = %f, %f",_playerSprite.physicsBody.velocity.dx,_playerSprite.physicsBody.velocity.dy);
     

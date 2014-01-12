@@ -164,14 +164,13 @@
     if (recognizer.state == UIGestureRecognizerStateEnded)
     {
         NSLog(@"handleSingleTouchSingleTap ended");
-        [_linkedToy setActionPoint:[recognizer locationInView:nil]];
+        [_linkedToy setActionVectorToPoint:[recognizer locationInView:nil]];
     }
     
 }
 
 - (void) exitAtPoint:(CGPoint) touchPoint
 {
-    [_linkedToy compoundWindUpRotations:_windUpRotations];
     [_linkedKey detachFromToyAtPoint:touchPoint];
     [self releaseLinkedNodes];
     [self.view removeFromSuperview];
