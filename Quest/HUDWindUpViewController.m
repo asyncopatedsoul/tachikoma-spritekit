@@ -105,8 +105,7 @@
     [self.view addGestureRecognizer:longPressGesture];
     
     //setup gesture overrides
-    //[circleGesture requireGestureRecognizerToFail:pinchGesture];
-    //[singleTouchSingleTap requireGestureRecognizerToFail:singleTouchDoubleTap];
+    [singleTouchDoubleTap requireGestureRecognizerToFail:longPressGesture];
     [circleGesture requireGestureRecognizerToFail:longPressGesture];
     [circleGesture requireGestureRecognizerToFail:singleTouchDoubleTap];
 }

@@ -39,6 +39,37 @@
     self.position = toyNode.position;
 }
 
+-(BOOL) setBasePointAtTarget: (SKNode*)targetNode
+{
+    _basePoint = targetNode.position;
+    
+    if ([targetNode.parent isEqual:self.parent])
+    {
+        return YES;
+    }
+    else
+    {
+        return NO;
+    }
+}
+-(void) triggerKeyWasHitWithNode: (SKSpriteNode*)contactNode;
+{
+    //immune if attached to toy
+    if (_isAttachedToToy)
+        return;
+    
+    if ([contactNode.name isEqualToString:@"actionObject"])
+        [self returnToBasePoint];
+}
+-(void) returnToBasePoint
+{
+    self.position = _basePoint;
+    
+    //TODO animate teleportation
+    
+    NSLog(@"returnToBasePoint: %f,%f",_basePoint.x,_basePoint.y);
+}
+
 -(void) detachFromToyAtPoint:(CGPoint)touchPoint
 {
     NSLog(@"detachFromToyAtPoint: %f,%f",touchPoint.x,touchPoint.y);

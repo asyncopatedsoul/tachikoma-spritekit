@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4C41B3891883739300C45CC5 /* TKDreamMachine.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C41B3881883739300C45CC5 /* TKDreamMachine.m */; };
+		4C41B38A1883739300C45CC5 /* TKDreamMachine.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C41B3881883739300C45CC5 /* TKDreamMachine.m */; };
 		4C43B416187FC3F200D53D79 /* HUDWindUp.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C43B415187FC3F200D53D79 /* HUDWindUp.m */; };
 		4C43B417187FC3F200D53D79 /* HUDWindUp.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C43B415187FC3F200D53D79 /* HUDWindUp.m */; };
 		4C43B41E187FCA5F00D53D79 /* HUDWindUpViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4C43B41D187FCA5F00D53D79 /* HUDWindUpViewController.m */; };
@@ -72,6 +74,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		4C41B3871883739300C45CC5 /* TKDreamMachine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TKDreamMachine.h; path = Quest/TKDreamMachine.h; sourceTree = "<group>"; };
+		4C41B3881883739300C45CC5 /* TKDreamMachine.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TKDreamMachine.m; path = Quest/TKDreamMachine.m; sourceTree = "<group>"; };
 		4C43B414187FC3F200D53D79 /* HUDWindUp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HUDWindUp.h; sourceTree = "<group>"; };
 		4C43B415187FC3F200D53D79 /* HUDWindUp.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HUDWindUp.m; sourceTree = "<group>"; };
 		4C43B41C187FCA5F00D53D79 /* HUDWindUpViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HUDWindUpViewController.h; sourceTree = "<group>"; };
@@ -151,6 +155,8 @@
 		B8ECB8C617FD101D001CEFC3 = {
 			isa = PBXGroup;
 			children = (
+				4C41B3871883739300C45CC5 /* TKDreamMachine.h */,
+				4C41B3881883739300C45CC5 /* TKDreamMachine.m */,
 				B8ECB8DA17FD101D001CEFC3 /* Quest */,
 				B8ECB90117FD101D001CEFC3 /* QuestTests */,
 				B8ECB8D117FD101D001CEFC3 /* Frameworks */,
@@ -374,6 +380,7 @@
 				B8ECB8E517FD101D001CEFC3 /* CSAppDelegate.m in Sources */,
 				4C43B41E187FCA5F00D53D79 /* HUDWindUpViewController.m in Sources */,
 				B8ECB91B17FD12F9001CEFC3 /* CSStartMenu.m in Sources */,
+				4C41B3891883739300C45CC5 /* TKDreamMachine.m in Sources */,
 				B8E48164180641A000AED6C4 /* CSCoin.m in Sources */,
 				B8ECB8E117FD101D001CEFC3 /* main.m in Sources */,
 				4C43B42C18829D2200D53D79 /* DPCircularGestureRecognizer.m in Sources */,
@@ -390,6 +397,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4C41B38A1883739300C45CC5 /* TKDreamMachine.m in Sources */,
 				B8ECB91417FD10A9001CEFC3 /* CSLevel.m in Sources */,
 				4C43B423188207C800D53D79 /* TKMasterKey.m in Sources */,
 				B8E48165180641A000AED6C4 /* CSCoin.m in Sources */,

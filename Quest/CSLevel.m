@@ -41,6 +41,7 @@ static int levelCount = 0;
     CSCharacter* leader;
     
     TKMasterKey* masterKey;
+    SKSpriteNode *playerAbase;
     
     NSArray* characterArray;
     NSArray* playersArray;
@@ -93,7 +94,7 @@ static int levelCount = 0;
         NSLog(@"The level is %i", currentLevel);
         
         [self setUpScene];
-        
+
         [self performSelector:@selector(setUpCharacters) withObject:nil afterDelay:0.5];
         
         
@@ -248,6 +249,8 @@ static int levelCount = 0;
     NSArray* coinArray = [NSArray arrayWithArray:[levelDict objectForKey:@"Coins"]];
     [self setUpCoins:coinArray];
     
+    [self setupTerrain];
+    [self setupInterestPoints];
     
     //setup to handle accelerometer readings using CoreMotion Framework
     [self startMonitoringAcceleration];
@@ -293,6 +296,18 @@ static int levelCount = 0;
 }
 
 
+-(void) setupTerrain
+{
+    
+}
+-(void) setupInterestPoints
+{
+    //setup player bases
+    playerAbase = [SKSpriteNode spriteNodeWithColor:[UIColor lightGrayColor] size:CGSizeMake(100.0, 100.0)];
+    playerAbase.position = CGPointMake(400.0, 800.0);
+    [myWorld addChild:playerAbase];
+}
+
 
 #pragma mark SetUp Characters
 
@@ -302,7 +317,6 @@ static int levelCount = 0;
     
     [self fadeToDeath:[myWorld childNodeWithName:@"instructions"]];
     
-  
     /*
     leader = [CSCharacter node];
     leader.checkForDifferentPhoneLocations = checkForDifferentPhoneLocations;
@@ -315,6 +329,8 @@ static int levelCount = 0;
     masterKey = [TKMasterKey node];
     masterKey.checkForDifferentPhoneLocations = checkForDifferentPhoneLocations;
     [masterKey createWithDictionary:[playersArray objectAtIndex:0] ];
+    [masterKey setBasePointAtTarget:playerAbase];
+    masterKey.position = masterKey.basePoint;
     [myWorld addChild:masterKey];
     
     int c = 0;
@@ -417,7 +433,8 @@ static int levelCount = 0;
         SKSpriteNode *actionObject = (SKSpriteNode *)[actionRange childNodeWithName:@"actionObject"];
         
         if ([actionRange intersectsNode:triggerObject]){
-            [toy triggerPhysicalAttackToTarget:triggerObject WithNode:actionObject];
+            double now = CACurrentMediaTime();
+            [toy triggerPhysicalAttackToTarget:triggerObject WithNode:actionObject atTime:now];
         }
         
         //[toy enumerateChildNodesWithName:@"actionRange" usingBlock:^(SKNode *node, BOOL *stop) {}];
@@ -454,6 +471,16 @@ static int levelCount = 0;
         */
         
     }];
+    
+    
+    [myWorld enumerateChildNodesWithName:@"//actionObject" usingBlock:^(SKNode *node, BOOL *stop) {
+        if ([node intersectsNode:masterKey.toyContactRange])
+             {
+                 [masterKey triggerKeyWasHitWithNode:(SKSpriteNode*)node];
+             }
+    }];
+    
+    
     //outside of the enumeration block, we then test for a leader or follower being found....
     
     if ( leaderFound == NO && gameHasBegun == YES) {

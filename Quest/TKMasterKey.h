@@ -21,7 +21,7 @@
 @property (nonatomic,assign) bool isAttachedToToy;
 @property (nonatomic,assign) TKToy* linkedToy;
 @property (nonatomic, assign) BOOL checkForDifferentPhoneLocations;
-
+@property (nonatomic,assign) CGPoint basePoint;
 
 
 -(void) createWithDictionary: (NSDictionary*)charData;
@@ -29,5 +29,9 @@
 -(void) moveFromMotionManager: (CMAccelerometerData*)data;
 -(void) attachToToy: (TKToy*)toyNode;
 -(void) detachFromToyAtPoint: (CGPoint)touchPoint;
+
+-(BOOL) setBasePointAtTarget: (SKNode*)targetNode;
+-(void) returnToBasePoint;
+-(void) triggerKeyWasHitWithNode: (SKSpriteNode*)contactNode;
 
 @end

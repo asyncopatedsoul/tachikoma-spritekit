@@ -62,7 +62,7 @@
 -(void) updateRotationsLabel
 {
     int roundedRotations = (int)floorf(fabs(_rotations));
-    rotationsLabel.text = [NSString stringWithFormat:@"%i | %f",roundedRotations, _rotations];
+    rotationsLabel.text = [NSString stringWithFormat:@"%i",roundedRotations];
 }
 - (void) updateActionRange
 {
@@ -135,9 +135,9 @@
     //TODO set actions from dictionary/plist
     
     //setup auto attack
-    float actionRange = 200.0;
-    float actionObjectMovementSpeed = 400.0;
-    float actionMinimumRepeatInterval = 0.5;
+    float actionRange = 600.0;
+    float actionObjectMovementSpeed = 800.0;
+    float actionMinimumRepeatInterval = 0.4;
     CGPoint actionOrigin = CGPointMake(0.0, 0.0);
     NSString *actionType = @"physicalAttack";
     
@@ -163,27 +163,44 @@
     [self addChild:actionRangeNode];
     
     //encode action nodes with behavior data
+    actionRangeNode.userData = [[NSMutableDictionary alloc] init];
+    [actionRangeNode.userData setValue:[NSNumber numberWithFloat:0.0] forKey:@"nextActionTime"];
+    [actionRangeNode.userData setValue:[NSNumber numberWithFloat:actionMinimumRepeatInterval] forKey:@"minimumRepeatInterval"];
+    
     actionObject.userData = [[NSMutableDictionary alloc] init];
     [actionObject.userData setValue:[NSString stringWithFormat:@"%@",actionType] forKey:@"type"];
     [actionObject.userData setValue:[NSNumber numberWithFloat:actionObjectMovementSpeed] forKey:@"movementSpeed"];
+    
     [actionObject.userData setValue:[NSNumber numberWithFloat:actionOrigin.x] forKey:@"originX"];
     [actionObject.userData setValue:[NSNumber numberWithFloat:actionOrigin.y] forKey:@"originY"];
 }
 
-- (void) triggerPhysicalAttackToTarget: (SKSpriteNode*)attackTarget WithNode: (SKSpriteNode*)attackNode
+- (void) triggerPhysicalAttackToTarget: (SKSpriteNode*)attackTarget WithNode: (SKSpriteNode*)attackNode atTime:(double)currentTime
 {
     //preserving its movement relative to player, like a kick or punch
     //not like a free projectile
+
+    float nextAttackTime = [[attackNode.parent.userData valueForKey:@"nextActionTime"] floatValue];
+    float minimumRepeatInterval = [[attackNode.parent.userData valueForKey:@"minimumRepeatInterval"] floatValue];
+    
+    float deltaTime = currentTime-nextAttackTime;
+    
+    //NSLog(@"next attack time: %f",nextAttackTime);
+    //NSLog(@"current time: %f",currentTime);
+    //NSLog(@"detla time: %f",deltaTime);
+    //NSLog(@"min interval: %f",minimumRepeatInterval);
+    
+    if (deltaTime < minimumRepeatInterval)
+        return;
     
     if ([attackNode actionForKey:@"isAttacking"])
         return;
-
-    //CGPoint attackOrigin = CGPointMake([[attackNode.userData valueForKey:@"originX"] floatValue], [[attackNode.userData valueForKey:@"originY"] floatValue]);
+    
+    [attackNode.parent.userData setValue:[NSNumber numberWithFloat:currentTime+minimumRepeatInterval] forKey:@"nextActionTime"];
+    
     CGPoint attackOrigin = attackNode.position;
     CGPoint attackPoint = [attackNode.parent convertPoint:attackTarget.position fromNode:attackTarget.parent];
-    //attackPoint.x = attackPoint.x/2;
-    //attackPoint.y = attackPoint.y/2;
-    //CGPoint attackPoint = CGPointMake(200.0, 200.0);
+
     
     SKSpriteNode* actionRangeNode = (SKSpriteNode*)attackNode.parent;
     NSLog(@"attack node parent: %@",actionRangeNode.name);
@@ -202,7 +219,6 @@
     NSLog(@"attack magnitude: %f", attackMagnitude);
     NSLog(@"attack duration: %f", attackDuration);
     
-    //attackNode.position = attackOrigin;
     //attackNode.hidden = NO;
     //[attackNode removeAllActions];
     

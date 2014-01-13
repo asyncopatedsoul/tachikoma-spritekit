@@ -16,4 +16,7 @@
 -(void) showWindUpInterfaceOverToy:(TKToy*)toyNode;
 -(void) hideWindUpInterface;
 
+-(void) setupTerrain;
+-(void) setupInterestPoints;
+
 @end
