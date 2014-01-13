@@ -34,5 +34,7 @@
 - (void) stopUnwind;
 
 - (void) setActionVectorToPoint:(CGPoint)actionPoint;
+- (void) setupAutoActions: (NSArray*)actionsArray;
+- (void) triggerPhysicalAttackToTarget: (SKSpriteNode*)attackTarget WithNode: (SKSpriteNode*)attackNode;
 
 @end

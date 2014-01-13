@@ -61,8 +61,8 @@
 
 -(void) updateRotationsLabel
 {
-    int roundedRotations = (int)floorf(_rotations);
-    rotationsLabel.text = [NSString stringWithFormat:@"%i",roundedRotations];
+    int roundedRotations = (int)floorf(fabs(_rotations));
+    rotationsLabel.text = [NSString stringWithFormat:@"%i | %f",roundedRotations, _rotations];
 }
 - (void) updateActionRange
 {
@@ -93,8 +93,8 @@
 {
     _rotations = 0;
     
-    //TODO set actions from dictionary/plist
-    _maxWindUpRotations = 3;
+    //TODO set default from dictionary/plist
+    _maxWindUpRotations = 2;
     _movementSpeed = 200.0; //per second
     unwindInterval = 0.1;
     unwindAmount = 0.05;
@@ -121,7 +121,7 @@
     
     _actionRange.lineWidth = 1;
     _actionRange.strokeColor = [SKColor greenColor];
-    //_actionRange.hidden = YES;
+    _actionRange.hidden = YES;
     _actionRange.zPosition = 1000;
     
     [self updateActionRange];
@@ -129,6 +129,99 @@
     [self addChild:_actionRange];
     
 }
+
+-(void) setupAutoActions: (NSArray*)actionsArray
+{
+    //TODO set actions from dictionary/plist
+    
+    //setup auto attack
+    float actionRange = 200.0;
+    float actionObjectMovementSpeed = 400.0;
+    float actionMinimumRepeatInterval = 0.5;
+    CGPoint actionOrigin = CGPointMake(0.0, 0.0);
+    NSString *actionType = @"physicalAttack";
+    
+    //TODO set eligible targets that trigger action
+    
+    //float actionObject
+    //size
+    //asset
+    //particles
+    
+    SKSpriteNode *actionRangeNode = [SKSpriteNode spriteNodeWithColor:[UIColor clearColor] size:CGSizeMake(actionRange*2, actionRange*2)];
+    SKSpriteNode *actionObject = [SKSpriteNode spriteNodeWithColor:[UIColor yellowColor] size:CGSizeMake(30.0, 30.0)];
+    
+    actionRangeNode.name = @"actionRange";
+    actionRangeNode.zPosition = 1;
+    actionRangeNode.position = CGPointMake(0.0, 0.0);
+    
+    actionObject.name = @"actionObject";
+    actionObject.zPosition = 2;
+    actionObject.position = actionOrigin;
+    
+    [actionRangeNode addChild:actionObject];
+    [self addChild:actionRangeNode];
+    
+    //encode action nodes with behavior data
+    actionObject.userData = [[NSMutableDictionary alloc] init];
+    [actionObject.userData setValue:[NSString stringWithFormat:@"%@",actionType] forKey:@"type"];
+    [actionObject.userData setValue:[NSNumber numberWithFloat:actionObjectMovementSpeed] forKey:@"movementSpeed"];
+    [actionObject.userData setValue:[NSNumber numberWithFloat:actionOrigin.x] forKey:@"originX"];
+    [actionObject.userData setValue:[NSNumber numberWithFloat:actionOrigin.y] forKey:@"originY"];
+}
+
+- (void) triggerPhysicalAttackToTarget: (SKSpriteNode*)attackTarget WithNode: (SKSpriteNode*)attackNode
+{
+    //preserving its movement relative to player, like a kick or punch
+    //not like a free projectile
+    
+    if ([attackNode actionForKey:@"isAttacking"])
+        return;
+
+    //CGPoint attackOrigin = CGPointMake([[attackNode.userData valueForKey:@"originX"] floatValue], [[attackNode.userData valueForKey:@"originY"] floatValue]);
+    CGPoint attackOrigin = attackNode.position;
+    CGPoint attackPoint = [attackNode.parent convertPoint:attackTarget.position fromNode:attackTarget.parent];
+    //attackPoint.x = attackPoint.x/2;
+    //attackPoint.y = attackPoint.y/2;
+    //CGPoint attackPoint = CGPointMake(200.0, 200.0);
+    
+    SKSpriteNode* actionRangeNode = (SKSpriteNode*)attackNode.parent;
+    NSLog(@"attack node parent: %@",actionRangeNode.name);
+    
+    NSLog(@"toy position: %f, %f",self.position.x,self.position.y);
+    NSLog(@"attack node position: %f,%f",attackNode.position.x, attackNode.position.y);
+    NSLog(@"attack start: %f,%f",attackOrigin.x,attackOrigin.y);
+    NSLog(@"attack end: %f,%f",attackPoint.x,attackPoint.y);
+   
+    
+    float deltaX = attackOrigin.x-attackPoint.x;
+    float deltaY = attackOrigin.y-attackPoint.y;
+    float attackMagnitude = sqrtf(powf(deltaX,2)+pow(deltaY,2));
+    float attackDuration = attackMagnitude/[[attackNode.userData valueForKey:@"movementSpeed"] floatValue];
+    
+    NSLog(@"attack magnitude: %f", attackMagnitude);
+    NSLog(@"attack duration: %f", attackDuration);
+    
+    //attackNode.position = attackOrigin;
+    //attackNode.hidden = NO;
+    //[attackNode removeAllActions];
+    
+    //TODO
+    //change player sprite to attack animation
+    
+    SKAction *attackAction = [SKAction moveTo:attackPoint duration:attackDuration];
+    SKAction *attackDoneAction = [SKAction runBlock:(dispatch_block_t)^() {
+        NSLog(@"Attack Completed");
+        //attackNode.hidden = YES;
+        attackNode.position = CGPointMake(0.0, 0.0);
+    }];
+    
+    SKAction *attackActionWithDone = [SKAction sequence:@[attackAction,attackDoneAction]];
+    
+    [attackNode runAction:attackActionWithDone withKey:@"isAttacking"];
+    
+}
+
 
 -(void) attachToKey: (TKMasterKey*)masterKey
 {
@@ -139,8 +232,7 @@
    
     [self stopUnwind];
     
-    //self.physicsBody.dynamic = NO;
-    //change to illustration with attached key
+    //TODO change to illustration with attached key
     
 }
 
@@ -149,8 +241,7 @@
     _actionRange.hidden = YES;
     actionTargetIndicator.hidden = YES;
     
-    //self.physicsBody.dynamic = YES;
-    //revert to default illustration
+    //TODO revert to default illustration
 }
 
 - (void) unwind

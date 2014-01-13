@@ -92,16 +92,22 @@
     singleTouchDoubleTap.delegate = self;
     [self.view addGestureRecognizer:singleTouchDoubleTap];
     
-    //Add a 1touch1tap
-    UITapGestureRecognizer* singleTouchSingleTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleSingleTouchSingleTap:)];
-    singleTouchSingleTap.numberOfTapsRequired = 1;
-    singleTouchSingleTap.numberOfTouchesRequired = 1;
-    singleTouchSingleTap.delegate = self;
-    [self.view addGestureRecognizer:singleTouchSingleTap];
+    //Add a 2touch1tap
+    UITapGestureRecognizer* doubleTouchSingleTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleDoubleTouchSingleTap:)];
+    doubleTouchSingleTap.numberOfTapsRequired = 1;
+    doubleTouchSingleTap.numberOfTouchesRequired = 2;
+    doubleTouchSingleTap.delegate = self;
+    [self.view addGestureRecognizer:doubleTouchSingleTap];
+    
+    //Add long press
+    UILongPressGestureRecognizer *longPressGesture = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(handleLongPressGesture:)];
+    [longPressGesture setMinimumPressDuration:0.3];
+    [self.view addGestureRecognizer:longPressGesture];
     
     //setup gesture overrides
     //[circleGesture requireGestureRecognizerToFail:pinchGesture];
-    [singleTouchSingleTap requireGestureRecognizerToFail:singleTouchDoubleTap];
+    //[singleTouchSingleTap requireGestureRecognizerToFail:singleTouchDoubleTap];
+    [circleGesture requireGestureRecognizerToFail:longPressGesture];
     [circleGesture requireGestureRecognizerToFail:singleTouchDoubleTap];
 }
 
@@ -153,20 +159,28 @@
     if (recognizer.state == UIGestureRecognizerStateEnded)
     {
         NSLog(@"handleSingleTouchDoubleTap ended");
-        [self exitAtPoint:[recognizer locationInView:nil]];
+        [_linkedToy setActionVectorToPoint:[recognizer locationInView:nil]];
     }
    
 }
 
-- (void) handleSingleTouchSingleTap: (UIGestureRecognizer *)recognizer
+- (void) handleDoubleTouchSingleTap: (UIGestureRecognizer *)recognizer
 {
-    NSLog(@"handleSingleTouchSingleTap entered");
+    NSLog(@"handleDoubleTouchSingleTap entered");
     if (recognizer.state == UIGestureRecognizerStateEnded)
     {
-        NSLog(@"handleSingleTouchSingleTap ended");
-        [_linkedToy setActionVectorToPoint:[recognizer locationInView:nil]];
+        NSLog(@"handleDoubleTouchSingleTap ended");
+        
     }
     
+}
+
+- (void) handleLongPressGesture: (UIGestureRecognizer *)recognizer
+{
+    if (recognizer.state == UIGestureRecognizerStateBegan)
+    {
+        [self exitAtPoint:[recognizer locationInView:nil]];
+    }
 }
 
 - (void) exitAtPoint:(CGPoint) touchPoint

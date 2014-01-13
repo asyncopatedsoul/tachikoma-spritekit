@@ -333,6 +333,7 @@ static int levelCount = 0;
     
     TKToy* character = [TKToy node];
     [character setupKeyInterface];
+    [character setupAutoActions:nil];
     
     character.checkForDifferentPhoneLocations = checkForDifferentPhoneLocations;
     [character createWithDictionary:[characterArray objectAtIndex:charactersInWorld] ];
@@ -408,6 +409,18 @@ static int levelCount = 0;
         // do something if we find a character inside of myWorld
         TKToy* toy = (TKToy*)node;
         
+        //TODO trigger actions on eligible targets
+        //TODO trigger actions by type
+        
+        SKSpriteNode *triggerObject = (SKSpriteNode*)masterKey;
+        SKSpriteNode *actionRange = (SKSpriteNode *)[toy childNodeWithName:@"actionRange"];
+        SKSpriteNode *actionObject = (SKSpriteNode *)[actionRange childNodeWithName:@"actionObject"];
+        
+        if ([actionRange intersectsNode:triggerObject]){
+            [toy triggerPhysicalAttackToTarget:triggerObject WithNode:actionObject];
+        }
+        
+        //[toy enumerateChildNodesWithName:@"actionRange" usingBlock:^(SKNode *node, BOOL *stop) {}];
         
         //if toy is within contact range of master key, attach them
         if ([masterKey.toyContactRange intersectsNode:toy.keyContactRange] && !masterKey.isAttachedToToy)

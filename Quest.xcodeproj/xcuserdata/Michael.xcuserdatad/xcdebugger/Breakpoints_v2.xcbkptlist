@@ -74,11 +74,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Quest/CSLevel.m"
-            timestampString = "411214372.229157"
+            timestampString = "411257402.331559"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "338"
-            endingLineNumber = "338"
+            startingLineNumber = "339"
+            endingLineNumber = "339"
             landmarkName = "-createAnotherCharacter"
             landmarkType = "5">
          </BreakpointContent>
