@@ -19,6 +19,7 @@
 @property (nonatomic, assign) SKSpriteNode* keySprite;
 @property (nonatomic, assign) SKSpriteNode* toyContactRange;
 @property (nonatomic,assign) bool isAttachedToToy;
+@property (nonatomic,assign) bool willIgnoreContact;
 @property (nonatomic,assign) TKToy* linkedToy;
 @property (nonatomic, assign) BOOL checkForDifferentPhoneLocations;
 @property (nonatomic,assign) CGPoint basePoint;
@@ -32,6 +33,6 @@
 
 -(BOOL) setBasePointAtTarget: (SKNode*)targetNode;
 -(void) returnToBasePoint;
--(void) triggerKeyWasHitWithNode: (SKSpriteNode*)contactNode;
+-(BOOL) triggerKeyTouchedNode: (SKSpriteNode*)contactNode;
 
 @end

@@ -48,7 +48,7 @@
     self.physicsBody.restitution = 1.0;
     self.physicsBody.allowsRotation = YES;
    
-    self.physicsBody.categoryBitMask = coinCategory;
+    //self.physicsBody.categoryBitMask = coinCategory;
     self.physicsBody.usesPreciseCollisionDetection = YES;
     
 }

@@ -248,9 +248,9 @@
     self.physicsBody.allowsRotation = NO;
     self.physicsBody.mass = 5;
     
-    self.physicsBody.categoryBitMask = playerCategory;
-    self.physicsBody.collisionBitMask = wallCategory | playerCategory | coinCategory;
-    self.physicsBody.contactTestBitMask = wallCategory | playerCategory | coinCategory;//separate other categories with |
+    self.physicsBody.categoryBitMask = toyCategory;
+    self.physicsBody.collisionBitMask = wallCategory | keyCategory;
+    self.physicsBody.contactTestBitMask = wallCategory | keyCategory;//separate other categories with |
     
 }
 

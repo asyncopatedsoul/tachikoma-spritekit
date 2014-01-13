@@ -246,8 +246,8 @@ static int levelCount = 0;
     }
     
 
-    NSArray* coinArray = [NSArray arrayWithArray:[levelDict objectForKey:@"Coins"]];
-    [self setUpCoins:coinArray];
+    //NSArray* coinArray = [NSArray arrayWithArray:[levelDict objectForKey:@"Coins"]];
+    //[self setUpCoins:coinArray];
     
     [self setupTerrain];
     [self setupInterestPoints];
@@ -304,7 +304,7 @@ static int levelCount = 0;
 {
     //setup player bases
     playerAbase = [SKSpriteNode spriteNodeWithColor:[UIColor lightGrayColor] size:CGSizeMake(100.0, 100.0)];
-    playerAbase.position = CGPointMake(400.0, 800.0);
+    playerAbase.position = CGPointMake(0.0, 500.0);
     [myWorld addChild:playerAbase];
 }
 
@@ -313,7 +313,7 @@ static int levelCount = 0;
 
 -(void) setUpCharacters {
     
-
+    _toysArray = [[NSMutableArray alloc] init];
     
     [self fadeToDeath:[myWorld childNodeWithName:@"instructions"]];
     
@@ -341,7 +341,8 @@ static int levelCount = 0;
         c++;
     }
     
- 
+    
+    NSLog(@"toysArray: %@",_toysArray);
 }
 
 -(void) createAnotherCharacter {
@@ -354,6 +355,8 @@ static int levelCount = 0;
     character.checkForDifferentPhoneLocations = checkForDifferentPhoneLocations;
     [character createWithDictionary:[characterArray objectAtIndex:charactersInWorld] ];
     [myWorld addChild:character];
+    
+    [_toysArray addObject:character];
     
     charactersInWorld ++;
     
@@ -427,23 +430,45 @@ static int levelCount = 0;
         
         //TODO trigger actions on eligible targets
         //TODO trigger actions by type
+        //TODO set attack priority or aggression rating
         
-        SKSpriteNode *triggerObject = (SKSpriteNode*)masterKey;
         SKSpriteNode *actionRange = (SKSpriteNode *)[toy childNodeWithName:@"actionRange"];
         SKSpriteNode *actionObject = (SKSpriteNode *)[actionRange childNodeWithName:@"actionObject"];
         
-        if ([actionRange intersectsNode:triggerObject]){
-            double now = CACurrentMediaTime();
-            [toy triggerPhysicalAttackToTarget:triggerObject WithNode:actionObject atTime:now];
+        //NSMutableArray *triggerObjects = [[NSMutableArray alloc] initWithArray:_toysArray copyItems:YES];
+        //[triggerObjects addObject:masterKey];
+        
+        NSMutableArray *triggerObjects = [[NSMutableArray alloc] initWithObjects:masterKey, nil];
+        
+        //TODO prevent toy from attacking itself
+        //[triggerObjects removeObjectIdenticalTo:node];
+        
+        for (id object in triggerObjects) {
+            
+            SKSpriteNode *triggerObject = (SKSpriteNode*)object;
+            
+            if ([actionRange intersectsNode:triggerObject]){
+                
+                NSLog(@"triggerObjects: %@",triggerObjects);
+                
+                double now = CACurrentMediaTime();
+                [toy triggerPhysicalAttackToTarget:triggerObject WithNode:actionObject atTime:now];
+                break;
+            }
+            
+            
+            
         }
+        
+        
         
         //[toy enumerateChildNodesWithName:@"actionRange" usingBlock:^(SKNode *node, BOOL *stop) {}];
         
         //if toy is within contact range of master key, attach them
-        if ([masterKey.toyContactRange intersectsNode:toy.keyContactRange] && !masterKey.isAttachedToToy)
+        if ([masterKey.toyContactRange intersectsNode:toy.keyContactRange])
         {
-            [masterKey attachToToy:(TKToy*)node];
-            [self showWindUpInterfaceOverToy:(TKToy*)node];
+            if ([masterKey triggerKeyTouchedNode:(SKSpriteNode*)node])
+                [self showWindUpInterfaceOverToy:(TKToy*)node];
         }
         
         /*
@@ -472,14 +497,14 @@ static int levelCount = 0;
         
     }];
     
-    
+    /*
     [myWorld enumerateChildNodesWithName:@"//actionObject" usingBlock:^(SKNode *node, BOOL *stop) {
         if ([node intersectsNode:masterKey.toyContactRange])
              {
                  [masterKey triggerKeyWasHitWithNode:(SKSpriteNode*)node];
              }
     }];
-    
+    */
     
     //outside of the enumeration block, we then test for a leader or follower being found....
     
@@ -524,17 +549,39 @@ static int levelCount = 0;
     firstBody = contact.bodyA;
     secondBody = contact.bodyB;
     
+    
+    ////ATTACKS
+    if ( (firstBody.categoryBitMask == attackCategory && secondBody.categoryBitMask == keyCategory) || (firstBody.categoryBitMask == keyCategory  && secondBody.categoryBitMask == attackCategory) )
+    {
+        NSLog(@"attack and key collided");
+        
+        TKMasterKey* key = (firstBody.categoryBitMask == keyCategory)?(TKMasterKey*)firstBody.node:(TKMasterKey*)secondBody.node;
+        
+        SKSpriteNode* attack = (firstBody.categoryBitMask == attackCategory)?(SKSpriteNode*)firstBody.node:(SKSpriteNode*)secondBody.node;
+        
+        [key triggerKeyTouchedNode:attack];
+    }
+    
+    if ( (firstBody.categoryBitMask == attackCategory && secondBody.categoryBitMask == toyCategory) || (firstBody.categoryBitMask == toyCategory  && secondBody.categoryBitMask == attackCategory) )
+    {
+        CSCharacter* toy = (firstBody.categoryBitMask == toyCategory)? (CSCharacter*) firstBody.node: (CSCharacter*) secondBody.node;
+        
+        //TODO damage with amount specific to attack
+        [toy doDamageWithAmount:25.0];
+    }
+    
+    
     ////WALLS
     
     if (firstBody.categoryBitMask == wallCategory || secondBody.categoryBitMask == wallCategory ) {
         
-        if (firstBody.categoryBitMask == playerCategory) {
+        if (firstBody.categoryBitMask == toyCategory) {
             CSCharacter* character = (CSCharacter*) firstBody.node;
             
             [self stopAllPlayersFromCollision:character];
             [character doDamageWithAmount:levelBorderCausesDamageBy];
             
-        } else if (secondBody.categoryBitMask == playerCategory) {
+        } else if (secondBody.categoryBitMask == toyCategory) {
             CSCharacter* character = (CSCharacter*) secondBody.node;
             
             [self stopAllPlayersFromCollision:character];
@@ -543,68 +590,6 @@ static int levelCount = 0;
         
         
     }
-    
-    
-    if (firstBody.categoryBitMask == coinCategory || secondBody.categoryBitMask == coinCategory ) {
-        
-        if (firstBody.categoryBitMask == coinCategory) {
-            CSCoin* coin = (CSCoin*) firstBody.node;
-           
-            [self testCoinCount];
-            [coin removeFromParent];
-            
-            
-        } else if (secondBody.categoryBitMask == coinCategory) {
-            CSCoin* coin = (CSCoin*) secondBody.node;
-           
-           [self testCoinCount];
-           [coin removeFromParent];
-        }
-        
-        
-    }
-    
-    //OTHER PLAYERS
-    
-     if (firstBody.categoryBitMask == playerCategory && secondBody.categoryBitMask == playerCategory ) {
-         
-         CSCharacter* character = (CSCharacter*) firstBody.node;
-         CSCharacter* character2 = (CSCharacter*) secondBody.node;
-         
-         if (character == leader) {
-             NSLog(@"character is leader");
-             
-             
-             
-         } else if (character2 == leader) {
-             NSLog(@"character2 is leader");
-         }
-         
-         /*
-         if (character == leader) {
-             
-             if (character2.followingEnabled == NO) {
-                 
-                 character2.followingEnabled = YES;
-                 [character2 followIntoPositionWithDirection:[leader returnDirection] andPlaceInLine:1 leaderLocation:leader.position];
-                 
-             }
-             
-             
-         } else if ( character2 == leader) {
-             
-             if (character.followingEnabled == NO) {
-                 
-                 character.followingEnabled = YES;
-                 [character followIntoPositionWithDirection:[leader returnDirection] andPlaceInLine:1 leaderLocation:leader.position];
-                 
-             }
-             
-         }
-         */
-         
-     }
-    
     
 }
 

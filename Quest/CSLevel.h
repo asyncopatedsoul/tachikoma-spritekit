@@ -13,6 +13,8 @@
 
 @interface CSLevel : SKScene <SKPhysicsContactDelegate>
 
+@property (nonatomic,retain) NSMutableArray* toysArray;
+
 -(void) showWindUpInterfaceOverToy:(TKToy*)toyNode;
 -(void) hideWindUpInterface;
 

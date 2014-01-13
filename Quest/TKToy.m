@@ -7,6 +7,7 @@
 //
 
 #import "TKToy.h"
+#import "constants.h"
 
 @interface TKToy()
 {
@@ -135,11 +136,12 @@
     //TODO set actions from dictionary/plist
     
     //setup auto attack
-    float actionRange = 600.0;
+    float actionRange = 200.0;
     float actionObjectMovementSpeed = 800.0;
     float actionMinimumRepeatInterval = 0.4;
     CGPoint actionOrigin = CGPointMake(0.0, 0.0);
-    NSString *actionType = @"physicalAttack";
+    NSString *actionType = @"physical";
+    float actionObjectMass = 1.0;
     
     //TODO set eligible targets that trigger action
     
@@ -159,6 +161,22 @@
     actionObject.zPosition = 2;
     actionObject.position = actionOrigin;
     
+    if ([actionType isEqualToString:@"physical"])
+    {
+        actionObject.physicsBody = [SKPhysicsBody bodyWithCircleOfRadius: 30.0/2];
+        actionObject.physicsBody.dynamic = YES;
+        actionObject.physicsBody.restitution = 0.2;
+        actionObject.physicsBody.allowsRotation = NO;
+        actionObject.physicsBody.mass = actionObjectMass;
+        
+        actionObject.physicsBody.categoryBitMask = attackCategory;
+        actionObject.physicsBody.collisionBitMask = wallCategory | keyCategory;
+        actionObject.physicsBody.contactTestBitMask = wallCategory | keyCategory;
+    }
+
+    
+    
+    
     [actionRangeNode addChild:actionObject];
     [self addChild:actionRangeNode];
     
@@ -177,6 +195,9 @@
 
 - (void) triggerPhysicalAttackToTarget: (SKSpriteNode*)attackTarget WithNode: (SKSpriteNode*)attackNode atTime:(double)currentTime
 {
+    NSLog(@"attacker: %@",self);
+    NSLog(@"attack node: %@", attackNode);
+    NSLog(@"attack target: %@",attackTarget);
     //preserving its movement relative to player, like a kick or punch
     //not like a free projectile
 
@@ -199,6 +220,8 @@
     [attackNode.parent.userData setValue:[NSNumber numberWithFloat:currentTime+minimumRepeatInterval] forKey:@"nextActionTime"];
     
     CGPoint attackOrigin = attackNode.position;
+    //attackNode.parent is the actionRangeNode
+    //if attackTarget is masterKey, attackTarget.parent is myWorld
     CGPoint attackPoint = [attackNode.parent convertPoint:attackTarget.position fromNode:attackTarget.parent];
 
     

@@ -52,22 +52,42 @@
         return NO;
     }
 }
--(void) triggerKeyWasHitWithNode: (SKSpriteNode*)contactNode;
+-(BOOL) triggerKeyTouchedNode: (SKSpriteNode*)contactNode;
 {
-    //immune if attached to toy
-    if (_isAttachedToToy)
-        return;
+    //NSLog(@"contactNode.name: %@",contactNode.name);
     
-    if ([contactNode.name isEqualToString:@"actionObject"])
+    //immune if attached to toy
+    if (_isAttachedToToy || _willIgnoreContact)
+        return NO;
+
+    if ([contactNode.name isEqualToString:@"character"])
+        [self attachToToy:(TKToy*)contactNode];
+    else if ([contactNode.name isEqualToString:@"actionObject"])
         [self returnToBasePoint];
+    
+    return YES;
 }
 -(void) returnToBasePoint
 {
-    self.position = _basePoint;
-    
-    //TODO animate teleportation
-    
     NSLog(@"returnToBasePoint: %f,%f",_basePoint.x,_basePoint.y);
+    
+    _willIgnoreContact = YES;
+    self.physicsBody.dynamic = NO;
+    [_keySprite setColor:[UIColor yellowColor]];
+    
+    //animate teleportation
+    SKAction *returnAction = [SKAction moveTo:_basePoint duration:1.0];
+    SKAction *returnDoneAction = [SKAction runBlock:(dispatch_block_t)^() {
+        NSLog(@"Return Completed");
+        _willIgnoreContact = NO;
+        self.physicsBody.dynamic = YES;
+        [_keySprite setColor:[UIColor greenColor]];
+    }];
+    
+    SKAction *returnActionWithDone = [SKAction sequence:@[returnAction,returnDoneAction]];
+    [self runAction:returnActionWithDone withKey:@"isReturning"];
+    
+    
 }
 
 -(void) detachFromToyAtPoint:(CGPoint)touchPoint
@@ -88,8 +108,7 @@
     float constrainedX;
     float constrainedY;
 
-    
-    float magnitude = sqrtf(centeredX*centeredX+centeredY*centeredY);
+    float magnitude = sqrtf(pow(centeredX,2)+pow(centeredY,2));
     float angle = atan2(centeredY, centeredX);
     
     NSLog(@"magnitude: %f",magnitude);
@@ -119,8 +138,8 @@
         _linkedToy = NULL;
     }];
     
-    SKAction *moveLaserActionWithDone = [SKAction sequence:@[detachAction,detachDoneAction]];
-    [self runAction:moveLaserActionWithDone withKey:@"isDetaching"];
+    SKAction *detachActionWithDone = [SKAction sequence:@[detachAction,detachDoneAction]];
+    [self runAction:detachActionWithDone withKey:@"isDetaching"];
     
     
     
@@ -201,11 +220,9 @@
     self.physicsBody.allowsRotation = NO;
     self.physicsBody.mass = 5;
     
-    /*
-    self.physicsBody.categoryBitMask = playerCategory;
-    self.physicsBody.collisionBitMask = wallCategory | playerCategory | coinCategory;
-    self.physicsBody.contactTestBitMask = wallCategory | playerCategory | coinCategory; // seperate other categories with |
-    */
+    self.physicsBody.categoryBitMask = keyCategory;
+    self.physicsBody.collisionBitMask = wallCategory | keyCategory | toyCategory | attackCategory;
+    self.physicsBody.contactTestBitMask = wallCategory | keyCategory | toyCategory | attackCategory; // seperate other categories with |
 }
 
 - (void) moveFromMotionManager: (CMAccelerometerData*) data
