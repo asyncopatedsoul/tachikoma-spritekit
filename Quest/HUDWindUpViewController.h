@@ -29,6 +29,8 @@
 - (void) handleMovingInCircle:(DPCircularGestureRecognizer *)recognizer;
 - (void) drawRadiusFromCenter: (CGPoint)centerPoint ThroughPoint: (CGPoint)touchPoint;
 
+- (void) handleTouchUpInside:(UIGestureRecognizer*) recognizer;
+
 - (void) teardown;
 
 @end

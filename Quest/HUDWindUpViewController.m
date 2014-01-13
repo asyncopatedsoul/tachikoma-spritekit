@@ -100,13 +100,14 @@
     [self.view addGestureRecognizer:doubleTouchSingleTap];
     
     //Add long press
+    /*
     UILongPressGestureRecognizer *longPressGesture = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(handleLongPressGesture:)];
     [longPressGesture setMinimumPressDuration:0.3];
     [self.view addGestureRecognizer:longPressGesture];
-    
+    */
     //setup gesture overrides
-    [singleTouchDoubleTap requireGestureRecognizerToFail:longPressGesture];
-    [circleGesture requireGestureRecognizerToFail:longPressGesture];
+    //[singleTouchDoubleTap requireGestureRecognizerToFail:longPressGesture];
+    //[circleGesture requireGestureRecognizerToFail:longPressGesture];
     [circleGesture requireGestureRecognizerToFail:singleTouchDoubleTap];
 }
 
@@ -119,22 +120,30 @@
 -(void)handleMovingInCircle:(DPCircularGestureRecognizer *)recognizer {
     NSLog(@"moving in circle!");
     
-    [self drawRadiusFromCenter:recognizer.circleCentre ThroughPoint:recognizer.newPoint];
-    
-    _windUpRadians+=_windUpProgression*recognizer.rotation;
-    
-    _windUpRotations = _windUpRadians/(2*M_PI);
-    
-    int maxRotations = [_linkedToy setWindUpRotations:_windUpRotations];
-    NSLog(@"max rotations: %i",maxRotations);
-    if (maxRotations!=0)
+    if (recognizer.state == UIGestureRecognizerStateEnded)
     {
-        _windUpRotations = maxRotations;
-        _windUpRadians = maxRotations*(2*M_PI);
+        [_linkedToy setActionVectorToPoint:[recognizer locationInView:nil]];
+        [self exitAtPoint:CGPointMake(0.0, 0.0)];
     }
+    else
+    {
     
-    [_windUpTotalLabel setText:[NSString stringWithFormat:@"%f",_windUpRotations]];
-    
+        [self drawRadiusFromCenter:recognizer.circleCentre ThroughPoint:recognizer.newPoint];
+        
+        _windUpRadians+=_windUpProgression*recognizer.rotation;
+        
+        _windUpRotations = _windUpRadians/(2*M_PI);
+        
+        int maxRotations = [_linkedToy setWindUpRotations:_windUpRotations];
+        NSLog(@"max rotations: %i",maxRotations);
+        if (maxRotations!=0)
+        {
+            _windUpRotations = maxRotations;
+            _windUpRadians = maxRotations*(2*M_PI);
+        }
+        
+        [_windUpTotalLabel setText:[NSString stringWithFormat:@"%f",_windUpRotations]];
+    }
 }
 
 - (void) drawRadiusFromCenter: (CGPoint)centerPoint ThroughPoint: (CGPoint)touchPoint
@@ -158,7 +167,7 @@
     if (recognizer.state == UIGestureRecognizerStateEnded)
     {
         NSLog(@"handleSingleTouchDoubleTap ended");
-        [_linkedToy setActionVectorToPoint:[recognizer locationInView:nil]];
+        //[_linkedToy setActionVectorToPoint:[recognizer locationInView:nil]];
     }
    
 }
@@ -178,7 +187,7 @@
 {
     if (recognizer.state == UIGestureRecognizerStateBegan)
     {
-        [self exitAtPoint:[recognizer locationInView:nil]];
+        //[self exitAtPoint:[recognizer locationInView:nil]];
     }
 }
 
@@ -188,5 +197,16 @@
     [self releaseLinkedNodes];
     [self.view removeFromSuperview];
 }
-
+/*
+- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+    NSLog(@"touches began at: %@",event);
+    
+    UITouch *touch = [[event allTouches] anyObject];
+    CGPoint touchLocation = [touch locationInView:touch.view];
+    
+}
+- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
+    NSLog(@"touches ended at: %@",event);
+}
+*/
 @end

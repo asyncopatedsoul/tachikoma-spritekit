@@ -160,6 +160,7 @@
     actionObject.name = @"actionObject";
     actionObject.zPosition = 2;
     actionObject.position = actionOrigin;
+    actionObject.hidden = YES;
     
     if ([actionType isEqualToString:@"physical"])
     {
@@ -170,13 +171,10 @@
         actionObject.physicsBody.mass = actionObjectMass;
         
         actionObject.physicsBody.categoryBitMask = attackCategory;
-        actionObject.physicsBody.collisionBitMask = wallCategory | keyCategory;
-        actionObject.physicsBody.contactTestBitMask = wallCategory | keyCategory;
+        actionObject.physicsBody.collisionBitMask = wallCategory | keyCategory | toyCategory;
+        actionObject.physicsBody.contactTestBitMask = wallCategory | keyCategory | toyCategory;
     }
 
-    
-    
-    
     [actionRangeNode addChild:actionObject];
     [self addChild:actionRangeNode];
     
@@ -193,11 +191,13 @@
     [actionObject.userData setValue:[NSNumber numberWithFloat:actionOrigin.y] forKey:@"originY"];
 }
 
-- (void) triggerPhysicalAttackToTarget: (SKSpriteNode*)attackTarget WithNode: (SKSpriteNode*)attackNode atTime:(double)currentTime
+- (BOOL) triggerPhysicalAttackToTarget: (SKNode*)attackTarget WithNode: (SKSpriteNode*)attackNode atTime:(double)currentTime
 {
+    /*
     NSLog(@"attacker: %@",self);
     NSLog(@"attack node: %@", attackNode);
     NSLog(@"attack target: %@",attackTarget);
+     */
     //preserving its movement relative to player, like a kick or punch
     //not like a free projectile
 
@@ -212,10 +212,18 @@
     //NSLog(@"min interval: %f",minimumRepeatInterval);
     
     if (deltaTime < minimumRepeatInterval)
-        return;
+        return NO;
     
     if ([attackNode actionForKey:@"isAttacking"])
-        return;
+        return NO;
+    
+    //do not attack a dead toy
+    if ([attackTarget isMemberOfClass:[TKToy class]])
+    {
+        CSCharacter* toyTarget = (CSCharacter*)attackTarget;
+        if (toyTarget.isDying)
+            return NO;
+    }
     
     [attackNode.parent.userData setValue:[NSNumber numberWithFloat:currentTime+minimumRepeatInterval] forKey:@"nextActionTime"];
     
@@ -225,14 +233,11 @@
     CGPoint attackPoint = [attackNode.parent convertPoint:attackTarget.position fromNode:attackTarget.parent];
 
     
-    SKSpriteNode* actionRangeNode = (SKSpriteNode*)attackNode.parent;
-    NSLog(@"attack node parent: %@",actionRangeNode.name);
-    
     NSLog(@"toy position: %f, %f",self.position.x,self.position.y);
     NSLog(@"attack node position: %f,%f",attackNode.position.x, attackNode.position.y);
     NSLog(@"attack start: %f,%f",attackOrigin.x,attackOrigin.y);
     NSLog(@"attack end: %f,%f",attackPoint.x,attackPoint.y);
-   
+    
     
     float deltaX = attackOrigin.x-attackPoint.x;
     float deltaY = attackOrigin.y-attackPoint.y;
@@ -248,10 +253,12 @@
     //TODO
     //change player sprite to attack animation
     
+    attackNode.hidden = NO;
+    
     SKAction *attackAction = [SKAction moveTo:attackPoint duration:attackDuration];
     SKAction *attackDoneAction = [SKAction runBlock:(dispatch_block_t)^() {
         NSLog(@"Attack Completed");
-        //attackNode.hidden = YES;
+        attackNode.hidden = YES;
         attackNode.position = CGPointMake(0.0, 0.0);
     }];
     
@@ -259,6 +266,7 @@
     
     [attackNode runAction:attackActionWithDone withKey:@"isAttacking"];
     
+    return YES;
 }
 
 

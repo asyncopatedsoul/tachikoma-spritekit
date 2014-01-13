@@ -28,7 +28,7 @@
     _circleStart        = CGPointZero;
     _circleCentre       = CGPointZero;
     _minRadiusSize      = 0.0f;
-    _maxRadiusSize      = 200.0f;
+    _maxRadiusSize      = 1000.0f;
     _latestUpdate       = 0.0f;
     _holePortion        = 0.0f;
     if (self.state == UIGestureRecognizerStatePossible) {
@@ -66,6 +66,7 @@
     _circleCentre = CGPointMake(CGRectGetMidX(self.view.bounds), CGRectGetMidY(self.view.bounds));
     
     if(![self validatePoint:self.circleStart]){
+        NSLog(@"validation failed");
         [self setState:UIGestureRecognizerStateFailed];
     }
 }
@@ -156,11 +157,14 @@
 - (void)touchesEnded:(NSSet *)touches
            withEvent:(UIEvent *)event
 {
+    NSLog(@"touchesEnded: %@",event);
     [super touchesEnded:touches withEvent:event];
     
     if ([self state] == UIGestureRecognizerStateChanged) {
+        NSLog(@"UIGestureRecognizerStateEnded");
         [self setState:UIGestureRecognizerStateEnded];
     } else {
+        NSLog(@"UIGestureRecognizerStateFailed");
         [self setState:UIGestureRecognizerStateFailed];
     }
     
@@ -170,6 +174,7 @@
 - (void)touchesCancelled:(NSSet *)touches
                withEvent:(UIEvent *)event
 {
+    NSLog(@"touchesCancelled: %@",event);
     [self touchesCancelled:touches withEvent:event];
     [self reset];
 }

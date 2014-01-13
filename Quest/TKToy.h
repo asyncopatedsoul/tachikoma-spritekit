@@ -35,6 +35,6 @@
 
 - (void) setActionVectorToPoint:(CGPoint)actionPoint;
 - (void) setupAutoActions: (NSArray*)actionsArray;
-- (void) triggerPhysicalAttackToTarget: (SKSpriteNode*)attackTarget WithNode: (SKSpriteNode*)attackNode atTime: (double)currentTime;
+- (BOOL) triggerPhysicalAttackToTarget: (SKNode*)attackTarget WithNode: (SKSpriteNode*)attackNode atTime: (double)currentTime;
 
 @end

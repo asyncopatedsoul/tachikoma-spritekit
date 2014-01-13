@@ -423,44 +423,48 @@ static int levelCount = 0;
         [masterKey moveFromMotionManager:_motionManager.accelerometerData];
     }
     
-    [myWorld enumerateChildNodesWithName:@"character" usingBlock:^(SKNode *node, BOOL *stop) {
+    for (id toy in self.toysArray)
+    {
+        //if dead, do not act
+        TKToy* currentToy = (TKToy*) toy;
         
-        // do something if we find a character inside of myWorld
-        TKToy* toy = (TKToy*)node;
+        if (currentToy.isDying)
+            continue;
         
-        //TODO trigger actions on eligible targets
         //TODO trigger actions by type
-        //TODO set attack priority or aggression rating
         
         SKSpriteNode *actionRange = (SKSpriteNode *)[toy childNodeWithName:@"actionRange"];
         SKSpriteNode *actionObject = (SKSpriteNode *)[actionRange childNodeWithName:@"actionObject"];
         
-        //NSMutableArray *triggerObjects = [[NSMutableArray alloc] initWithArray:_toysArray copyItems:YES];
-        //[triggerObjects addObject:masterKey];
+        //TODO determine eligible action trigger objects
         
-        NSMutableArray *triggerObjects = [[NSMutableArray alloc] initWithObjects:masterKey, nil];
+        NSMutableArray *triggerObjects = [[NSMutableArray alloc] initWithArray:self.toysArray];
+        //NSLog(@"triggerObjects: %@",triggerObjects);
         
         //TODO prevent toy from attacking itself
-        //[triggerObjects removeObjectIdenticalTo:node];
+        [triggerObjects removeObjectIdenticalTo:toy];
         
-        for (id object in triggerObjects) {
-            
-            SKSpriteNode *triggerObject = (SKSpriteNode*)object;
-            
-            if ([actionRange intersectsNode:triggerObject]){
-                
-                NSLog(@"triggerObjects: %@",triggerObjects);
-                
+        //TODO set attack priority from eligible targets
+        //SKNode* priorityTarget = [triggerObjects objectAtIndex:0];
+        
+        for (id triggerObject in triggerObjects)
+        {
+            if ([actionRange intersectsNode: triggerObject])
+            {
                 double now = CACurrentMediaTime();
-                [toy triggerPhysicalAttackToTarget:triggerObject WithNode:actionObject atTime:now];
-                break;
+                
+                if ([currentToy triggerPhysicalAttackToTarget:triggerObject WithNode:actionObject atTime:now])
+                    break;
             }
-            
-            
-            
+
         }
         
+    }
+    
+    [myWorld enumerateChildNodesWithName:@"character" usingBlock:^(SKNode *node, BOOL *stop) {
         
+        // do something if we find a character inside of myWorld
+        TKToy* toy = (TKToy*)node;
         
         //[toy enumerateChildNodesWithName:@"actionRange" usingBlock:^(SKNode *node, BOOL *stop) {}];
         
@@ -566,6 +570,7 @@ static int levelCount = 0;
     {
         CSCharacter* toy = (firstBody.categoryBitMask == toyCategory)? (CSCharacter*) firstBody.node: (CSCharacter*) secondBody.node;
         
+        NSLog(@"attack and toy collided");
         //TODO damage with amount specific to attack
         [toy doDamageWithAmount:25.0];
     }

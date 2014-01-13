@@ -249,8 +249,8 @@
     self.physicsBody.mass = 5;
     
     self.physicsBody.categoryBitMask = toyCategory;
-    self.physicsBody.collisionBitMask = wallCategory | keyCategory;
-    self.physicsBody.contactTestBitMask = wallCategory | keyCategory;//separate other categories with |
+    self.physicsBody.collisionBitMask = wallCategory | keyCategory | attackCategory;
+    self.physicsBody.contactTestBitMask = wallCategory | keyCategory | attackCategory;//separate other categories with |
     
 }
 
@@ -1087,10 +1087,12 @@ CGFloat RadiansToDegrees(CGFloat radians)
 }
 -(void) damageDone {
     
+    
     currentDirection = noDirection;
     
     if (_currentHealth <= 0) {
-
+        
+        /*
         [self enumerateChildNodesWithName:@"*" usingBlock:^(SKNode *node, BOOL *stop) {
             
             [node removeFromParent];
@@ -1098,14 +1100,14 @@ CGFloat RadiansToDegrees(CGFloat radians)
         }];
         
         [self deathEmitter];
-       
+        */
         _isDying = YES;
         self.physicsBody.dynamic = NO;
         self.physicsBody = nil;
         
-        [self performSelector:@selector(removeFromParent) withObject:nil afterDelay:1.0];
+        //[self performSelector:@selector(removeFromParent) withObject:nil afterDelay:1.0];
     }
-
+    
     
     
 }

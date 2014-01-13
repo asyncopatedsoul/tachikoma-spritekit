@@ -33,6 +33,7 @@
     _linkedToy = toyNode;
     self.physicsBody.dynamic = NO;
     self.isAttachedToToy = YES;
+    self.willIgnoreContact = YES;
     [toyNode attachToKey:self];
     
     self.hidden = YES;
@@ -57,11 +58,17 @@
     //NSLog(@"contactNode.name: %@",contactNode.name);
     
     //immune if attached to toy
-    if (_isAttachedToToy || _willIgnoreContact)
+    if (self.willIgnoreContact)
         return NO;
 
     if ([contactNode.name isEqualToString:@"character"])
-        [self attachToToy:(TKToy*)contactNode];
+    {
+        //do not attach if toy is executing an order
+        //i.e. toy is moving
+        if (![contactNode actionForKey:@"isMoving"])
+            [self attachToToy:(TKToy*)contactNode];
+    }
+    
     else if ([contactNode.name isEqualToString:@"actionObject"])
         [self returnToBasePoint];
     
@@ -100,8 +107,10 @@
     [_linkedToy startUnwind];
     
     //if ipad
-    float centeredX = touchPoint.x-768/2;
-    float centeredY = touchPoint.y-1024/2;
+    //float centeredX = touchPoint.x-768/2;
+    //float centeredY = touchPoint.y-1024/2;
+    float centeredX = touchPoint.x;
+    float centeredY = touchPoint.y;
     
     NSLog(@"centered location: %f, %f",centeredX,centeredY);
     
@@ -129,16 +138,18 @@
     CGPoint detachLocation = CGPointMake(constrainedX, constrainedY);
     
     self.hidden = NO;
-    self.physicsBody.dynamic = YES;
+    self.isAttachedToToy = NO;
     
     SKAction *detachAction = [SKAction moveTo:detachLocation duration:magnitude/_movementSpeed];
+    SKAction *delay = [SKAction waitForDuration:0.5];
     SKAction *detachDoneAction = [SKAction runBlock:(dispatch_block_t)^() {
         NSLog(@"Detach Completed");
-        self.isAttachedToToy = NO;
-        _linkedToy = NULL;
+        self.physicsBody.dynamic = YES;
+        self.willIgnoreContact = NO;
+        self.linkedToy = NULL;
     }];
     
-    SKAction *detachActionWithDone = [SKAction sequence:@[detachAction,detachDoneAction]];
+    SKAction *detachActionWithDone = [SKAction sequence:@[detachAction,delay,detachDoneAction]];
     [self runAction:detachActionWithDone withKey:@"isDetaching"];
     
     
@@ -184,6 +195,7 @@
     }
     
     self.isAttachedToToy = NO;
+    self.willIgnoreContact = NO;
     
     [self addChild:_toyContactRange];
     [self addChild:_keySprite];
