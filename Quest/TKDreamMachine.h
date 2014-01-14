@@ -11,6 +11,8 @@
 @interface TKDreamMachine : TKToy
 
 @property (nonatomic,assign) int selectedToyId;
+@property (nonatomic,assign) int selectedToyCost;
+@property (nonatomic,retain) NSDictionary* selectedToyTemplate;
 @property  (nonatomic,assign) CGPoint spawnPoint;
 
 - (void) setSpawnTimer;

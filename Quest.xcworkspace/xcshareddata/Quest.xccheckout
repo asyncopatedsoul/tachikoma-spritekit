@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>2FF679BC-909D-4E06-8281-6CECA2C8308B</string>
+	<key>IDESourceControlProjectName</key>
+	<string>Quest</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>6CF80E41-AE76-4F68-B231-737C2E5898A4</key>
+		<string>https://github.com/asyncopatedsoul/tachikoma-spritekit.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>Quest.xcworkspace</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>6CF80E41-AE76-4F68-B231-737C2E5898A4</key>
+		<string>..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>https://github.com/asyncopatedsoul/tachikoma-spritekit.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>110</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>6CF80E41-AE76-4F68-B231-737C2E5898A4</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>6CF80E41-AE76-4F68-B231-737C2E5898A4</string>
+			<key>IDESourceControlWCCName</key>
+			<string>tachikoma-spritekit</string>
+		</dict>
+	</array>
+</dict>
+</plist>

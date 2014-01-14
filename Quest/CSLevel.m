@@ -14,6 +14,7 @@
 
 #import "TKMasterKey.h"
 #import "TKToy.h"
+#import "TKDreamMachine.h"
 
 @import AVFoundation;
 @import CoreMotion;
@@ -37,7 +38,6 @@ static int levelCount = 0;
     int currentLevel;
     unsigned char charactersInWorld; // 0 to 255
     
-    SKNode* myWorld;
     CSCharacter* leader;
     
     TKMasterKey* masterKey;
@@ -88,7 +88,9 @@ static int levelCount = 0;
         gameHasBegun = NO;
         
         currentLevel = levelCount; // Later on, we will create a singleton to hold game data that is independent of this class.
-        charactersInWorld = 0;
+        
+        //TODO properly setup toys from customized plist
+        charactersInWorld = 1;
         coinsCollected = 0;
         
         NSLog(@"The level is %i", currentLevel);
@@ -106,7 +108,7 @@ static int levelCount = 0;
 //test the physics
 -(void)moveCoinsWithImpulse {
     
-    [myWorld enumerateChildNodesWithName:@"coin" usingBlock:^(SKNode *node, BOOL *stop) {
+    [self.worldNode enumerateChildNodesWithName:@"coin" usingBlock:^(SKNode *node, BOOL *stop) {
         
         [node.physicsBody applyImpulse: CGVectorMake(30, 30)];
         
@@ -119,7 +121,7 @@ static int levelCount = 0;
 
 -(void)moveCoinsWithForce {
     
-     [myWorld enumerateChildNodesWithName:@"coin" usingBlock:^(SKNode *node, BOOL *stop) {
+     [self.worldNode enumerateChildNodesWithName:@"coin" usingBlock:^(SKNode *node, BOOL *stop) {
     
          [node.physicsBody applyForce: CGVectorMake(-1, -1)];
          
@@ -138,6 +140,10 @@ static int levelCount = 0;
     self.paused = NO;
 }
 
+-(void) addToy:(TKToy*)newToy
+{
+    
+}
 
 #pragma mark SetUp Scene
 
@@ -178,13 +184,13 @@ static int levelCount = 0;
     useDelayedFollow = [[levelDict objectForKey:@"UseDelayedFollow"] boolValue];
     
     self.anchorPoint = CGPointMake(0.5, 0.5); //0,0 to 1,1
-    myWorld = [SKNode node];
-    [self addChild:myWorld];
+    self.worldNode = [SKNode node];
+    [self addChild:self.worldNode];
     
     
     SKNode* instructionNode = [SKNode node];
     instructionNode.name = @"instructions";
-    [myWorld addChild:instructionNode];
+    [self.worldNode addChild:instructionNode];
     instructionNode.position = CGPointMake(0, 0);
     instructionNode.zPosition = 50;
     
@@ -213,14 +219,14 @@ static int levelCount = 0;
     coinLabel.fontSize = 22;
     coinLabel.zPosition = 1001;
     coinLabel.horizontalAlignmentMode = SKLabelHorizontalAlignmentModeLeft;
-    [myWorld addChild:coinLabel];
+    [self.worldNode addChild:coinLabel];
     
     
     
     
     SKSpriteNode* map = [SKSpriteNode spriteNodeWithImageNamed:[levelDict objectForKey:@"Background"]];
     map.position = CGPointMake(0, 0.0);
-    [myWorld addChild:map];
+    [self.worldNode addChild:map];
     
     // Setup Physics
     
@@ -235,8 +241,8 @@ static int levelCount = 0;
     self.physicsWorld.gravity = CGVectorMake(0.0, 0.0);
     self.physicsWorld.contactDelegate = self;
     
-    myWorld.physicsBody = [SKPhysicsBody bodyWithEdgeLoopFromRect:mapWithSmallerRect];
-    myWorld.physicsBody.categoryBitMask = wallCategory;
+    self.worldNode.physicsBody = [SKPhysicsBody bodyWithEdgeLoopFromRect:mapWithSmallerRect];
+    self.worldNode.physicsBody.categoryBitMask = wallCategory;
     
     if ( [[levelDict objectForKey:@"DebugBorder"] boolValue]  == YES) {
         
@@ -267,7 +273,7 @@ static int levelCount = 0;
     pathShape.strokeColor = [SKColor greenColor];
     pathShape.position = CGPointMake( 0, 0);
     
-    [myWorld addChild:pathShape];
+    [self.worldNode addChild:pathShape];
     pathShape.zPosition = 1000;
     
 }
@@ -305,7 +311,7 @@ static int levelCount = 0;
     //setup player bases
     playerAbase = [SKSpriteNode spriteNodeWithColor:[UIColor lightGrayColor] size:CGSizeMake(100.0, 100.0)];
     playerAbase.position = CGPointMake(0.0, 500.0);
-    [myWorld addChild:playerAbase];
+    [self.worldNode addChild:playerAbase];
 }
 
 
@@ -315,7 +321,7 @@ static int levelCount = 0;
     
     _toysArray = [[NSMutableArray alloc] init];
     
-    [self fadeToDeath:[myWorld childNodeWithName:@"instructions"]];
+    [self fadeToDeath:[self.worldNode childNodeWithName:@"instructions"]];
     
     /*
     leader = [CSCharacter node];
@@ -323,7 +329,7 @@ static int levelCount = 0;
     [leader createWithDictionary:[characterArray objectAtIndex:0] ];
     [leader makeLeader];
     
-    [myWorld addChild:leader];
+    [self.worldNode addChild:leader];
      */
     
     masterKey = [TKMasterKey node];
@@ -331,16 +337,24 @@ static int levelCount = 0;
     [masterKey createWithDictionary:[playersArray objectAtIndex:0] ];
     [masterKey setBasePointAtTarget:playerAbase];
     masterKey.position = masterKey.basePoint;
-    [myWorld addChild:masterKey];
+    [self.worldNode addChild:masterKey];
     
-    int c = 0;
+    //setup dream machine
+    TKDreamMachine* dreamMachine = [TKDreamMachine node];
+    [dreamMachine setupKeyInterface];
+    dreamMachine.checkForDifferentPhoneLocations = checkForDifferentPhoneLocations;
+    [dreamMachine createWithDictionary:[characterArray objectAtIndex:0] ];
+    [self.worldNode addChild:dreamMachine];
+    
+    [_toysArray addObject:dreamMachine];
+    
+    int c = charactersInWorld;
     
     while (c < [characterArray count] ){
         [self createAnotherCharacter];
         //[self performSelector:@selector(createAnotherCharacter) withObject:nil afterDelay:(0.5 * c)];
         c++;
     }
-    
     
     NSLog(@"toysArray: %@",_toysArray);
 }
@@ -354,7 +368,7 @@ static int levelCount = 0;
     
     character.checkForDifferentPhoneLocations = checkForDifferentPhoneLocations;
     [character createWithDictionary:[characterArray objectAtIndex:charactersInWorld] ];
-    [myWorld addChild:character];
+    [self.worldNode addChild:character];
     
     [_toysArray addObject:character];
     
@@ -402,7 +416,7 @@ static int levelCount = 0;
         
         CSCoin* newCoin = [CSCoin node];
         [newCoin createWithBaseImage:baseString andLocation:coinLocation ];
-        [myWorld addChild:newCoin];
+        [self.worldNode addChild:newCoin];
         
         c++;
     }
@@ -461,9 +475,9 @@ static int levelCount = 0;
         
     }
     
-    [myWorld enumerateChildNodesWithName:@"character" usingBlock:^(SKNode *node, BOOL *stop) {
+    [self.worldNode enumerateChildNodesWithName:@"character" usingBlock:^(SKNode *node, BOOL *stop) {
         
-        // do something if we find a character inside of myWorld
+        // do something if we find a character inside of self.worldNode
         TKToy* toy = (TKToy*)node;
         
         //[toy enumerateChildNodesWithName:@"actionRange" usingBlock:^(SKNode *node, BOOL *stop) {}];
@@ -502,7 +516,7 @@ static int levelCount = 0;
     }];
     
     /*
-    [myWorld enumerateChildNodesWithName:@"//actionObject" usingBlock:^(SKNode *node, BOOL *stop) {
+    [self.worldNode enumerateChildNodesWithName:@"//actionObject" usingBlock:^(SKNode *node, BOOL *stop) {
         if ([node intersectsNode:masterKey.toyContactRange])
              {
                  [masterKey triggerKeyWasHitWithNode:(SKSpriteNode*)node];
@@ -520,13 +534,13 @@ static int levelCount = 0;
         
             NSLog(@"Leader not found, assigning new one");
             
-             [myWorld enumerateChildNodesWithName:@"character" usingBlock:^(SKNode *node, BOOL *stop) {
+             [self.worldNode enumerateChildNodesWithName:@"character" usingBlock:^(SKNode *node, BOOL *stop) {
         
                  CSCharacter* character = (CSCharacter*)node;
                  if (character.followingEnabled == YES) {
                      leader = character;
                      [leader makeLeader];
-                     [myWorld insertChild:leader atIndex:0];
+                     [self.worldNode insertChild:leader atIndex:0];
                  }
         
             }];
@@ -652,7 +666,7 @@ static int levelCount = 0;
     
     __block unsigned char place = 0;
     
-    [myWorld enumerateChildNodesWithName:@"character" usingBlock:^(SKNode *node, BOOL *stop) {
+    [self.worldNode enumerateChildNodesWithName:@"character" usingBlock:^(SKNode *node, BOOL *stop) {
         
         gameHasBegun = YES;
         
@@ -683,7 +697,7 @@ static int levelCount = 0;
    
     __block unsigned char place = 0;
     
-    [myWorld enumerateChildNodesWithName:@"character" usingBlock:^(SKNode *node, BOOL *stop) {
+    [self.worldNode enumerateChildNodesWithName:@"character" usingBlock:^(SKNode *node, BOOL *stop) {
         
         gameHasBegun = YES;
         
@@ -717,7 +731,7 @@ static int levelCount = 0;
     
     __block unsigned char place = 0;
     
-    [myWorld enumerateChildNodesWithName:@"character" usingBlock:^(SKNode *node, BOOL *stop) {
+    [self.worldNode enumerateChildNodesWithName:@"character" usingBlock:^(SKNode *node, BOOL *stop) {
         
         gameHasBegun = YES;
         
@@ -747,7 +761,7 @@ static int levelCount = 0;
     
     __block unsigned char place = 0;
     
-    [myWorld enumerateChildNodesWithName:@"character" usingBlock:^(SKNode *node, BOOL *stop) {
+    [self.worldNode enumerateChildNodesWithName:@"character" usingBlock:^(SKNode *node, BOOL *stop) {
         
         gameHasBegun = YES;
 
@@ -781,7 +795,7 @@ static int levelCount = 0;
    // NSLog(@"one finger tap");
     
     
-    [myWorld enumerateChildNodesWithName:@"character" usingBlock:^(SKNode *node, BOOL *stop) {
+    [self.worldNode enumerateChildNodesWithName:@"character" usingBlock:^(SKNode *node, BOOL *stop) {
         
         CSCharacter* character = (CSCharacter*)node;
         [character attack];
@@ -813,7 +827,7 @@ static int levelCount = 0;
     
     __block unsigned char i = 1;
     
-    [myWorld enumerateChildNodesWithName:@"character" usingBlock:^(SKNode *node, BOOL *stop) {
+    [self.worldNode enumerateChildNodesWithName:@"character" usingBlock:^(SKNode *node, BOOL *stop) {
         
         CSCharacter* character = (CSCharacter*)node;
         [character stopMoving];
@@ -829,7 +843,7 @@ static int levelCount = 0;
                 leader = character;
                 leader.theLeader = YES;
                 [leader makeLeader];
-                [myWorld insertChild:leader atIndex:0];
+                [self.worldNode insertChild:leader atIndex:0];
                 
             }
     
@@ -863,7 +877,7 @@ static int levelCount = 0;
     __block unsigned char leaderDirection;
     __block unsigned char place = 0;
     
-    [myWorld enumerateChildNodesWithName:@"character" usingBlock:^(SKNode *node, BOOL *stop) {
+    [self.worldNode enumerateChildNodesWithName:@"character" usingBlock:^(SKNode *node, BOOL *stop) {
         
         CSCharacter* character = (CSCharacter*)node;
         
@@ -893,7 +907,7 @@ static int levelCount = 0;
     
     [NSObject cancelPreviousPerformRequestsWithTarget:self];
     
-    [myWorld enumerateChildNodesWithName:@"character" usingBlock:^(SKNode *node, BOOL *stop) {
+    [self.worldNode enumerateChildNodesWithName:@"character" usingBlock:^(SKNode *node, BOOL *stop) {
         
         CSCharacter* character = (CSCharacter*)node;
         
@@ -955,13 +969,13 @@ static int levelCount = 0;
 -(void) gameOver {
     
     [self stopMonitoringAcceleration];
-    [myWorld enumerateChildNodesWithName:@"*" usingBlock:^(SKNode *node, BOOL *stop) {
+    [self.worldNode enumerateChildNodesWithName:@"*" usingBlock:^(SKNode *node, BOOL *stop) {
         
         [node removeFromParent];
         
     }];
     
-    [myWorld removeFromParent];
+    [self.worldNode removeFromParent];
     
     
     SKScene *nextScene = [[CSStartMenu alloc ] initWithSize:self.size ];
